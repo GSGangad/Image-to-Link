@@ -1,0 +1,1594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Convert images to shareable links instantly with this free online tool. Supports PNG, JPG, GIF, SVG, and WebP formats.">
+    <meta name="keywords" content="image to link, image converter, base64 converter, image sharing tool, image URL generator">
+    <meta name="author" content="Image Link Converter Tool">
+    <meta property="og:title" content="Image to Link Converter">
+    <meta property="og:description" content="Convert images to shareable links instantly with this free online tool.">
+    <meta property="og:type" content="website">
+    <meta property="twitter:card" content="summary_large_image">
+    <title>Image to Link Converter | Instant Image URL Generator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #4895ef;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --success-color: #4cc9f0;
+            --warning-color: #f72585;
+            --border-radius: 12px;
+            --box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+            --transition: all 0.3s ease;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: 1px solid rgba(255, 255, 255, 0.2);
+            --glass-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            --cursor-size: 20px;
+            --cursor-color: var(--primary-color);
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #4895ef;
+            --secondary-color: #4361ee;
+            --accent-color: #3f37c9;
+            --light-color: #212529;
+            --dark-color: #f8f9fa;
+            --glass-bg: rgba(0, 0, 0, 0.2);
+            --glass-border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--dark-color);
+            min-height: 100vh;
+            transition: var(--transition);
+            overflow-x: hidden;
+            cursor: none;
+        }
+
+        [data-theme="dark"] body {
+            background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+        }
+
+        .custom-cursor {
+            position: fixed;
+            width: var(--cursor-size);
+            height: var(--cursor-size);
+            border-radius: 50%;
+            background-color: var(--cursor-color);
+            pointer-events: none;
+            mix-blend-mode: difference;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: transform 0.1s ease, width 0.3s ease, height 0.3s ease, background-color 0.3s ease;
+        }
+
+        .custom-cursor.active {
+            width: calc(var(--cursor-size) * 2);
+            height: calc(var(--cursor-size) * 2);
+            background-color: rgba(var(--cursor-color), 0.5);
+        }
+
+        .cursor-follower {
+            position: fixed;
+            width: calc(var(--cursor-size) * 2);
+            height: calc(var(--cursor-size) * 2);
+            border-radius: 50%;
+            border: 2px solid var(--cursor-color);
+            pointer-events: none;
+            z-index: 9998;
+            transform: translate(-50%, -50%);
+            transition: transform 0.3s ease, width 0.3s ease, height 0.3s ease;
+            opacity: 0.5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Preloader */
+        .preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--light-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 99999;
+            transition: opacity 0.5s ease;
+        }
+
+        .preloader.fade-out {
+            opacity: 0;
+        }
+
+        .loader {
+            width: 48px;
+            height: 48px;
+            border: 5px solid var(--primary-color);
+            border-bottom-color: transparent;
+            border-radius: 50%;
+            display: inline-block;
+            box-sizing: border-box;
+            animation: rotation 1s linear infinite;
+        }
+
+        @keyframes rotation {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--dark-color);
+            text-decoration: none;
+        }
+
+        .logo i {
+            color: var(--primary-color);
+            font-size: 2rem;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .theme-toggle {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: var(--glass-border);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: var(--glass-shadow);
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .theme-toggle i {
+            font-size: 1.2rem;
+            color: var(--dark-color);
+        }
+
+        .share-btn {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: var(--glass-border);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: var(--glass-shadow);
+        }
+
+        .share-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .share-btn i {
+            font-size: 1.2rem;
+            color: var(--dark-color);
+        }
+
+        /* Main Content */
+        .main-title {
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .main-title h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .main-title p {
+            font-size: 1rem;
+            color: var(--dark-color);
+            opacity: 0.8;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Tool Container */
+        .tool-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        @media (max-width: 768px) {
+            .tool-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Upload Section */
+        .upload-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: var(--glass-border);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--glass-shadow);
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-height: 300px;
+        }
+
+        .upload-section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .dropzone {
+            width: 100%;
+            height: 200px;
+            border: 2px dashed var(--primary-color);
+            border-radius: var(--border-radius);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dropzone.active {
+            border-color: var(--accent-color);
+            background-color: rgba(var(--accent-color), 0.1);
+        }
+
+        .dropzone i {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .dropzone p {
+            color: var(--dark-color);
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .dropzone span {
+            color: var(--dark-color);
+            opacity: 0.7;
+            font-size: 0.8rem;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-btn {
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            box-shadow: 0 4px 15px rgba(var(--primary-color), 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(var(--primary-color), 0.4);
+        }
+
+        .upload-btn:active {
+            transform: translateY(1px);
+        }
+
+        .upload-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .upload-btn:hover::before {
+            left: 100%;
+        }
+
+        /* Preview Section */
+        .preview-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: var(--glass-border);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--glass-shadow);
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            min-height: 300px;
+        }
+
+        .preview-section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .preview-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--dark-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .preview-title i {
+            color: var(--primary-color);
+        }
+
+        .image-preview {
+            width: 100%;
+            height: 200px;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            margin-bottom: 1rem;
+            background-color: rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .image-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            display: none;
+        }
+
+        .image-preview .placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--dark-color);
+            opacity: 0.5;
+        }
+
+        .image-preview .placeholder i {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .image-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            color: var(--dark-color);
+            opacity: 0.8;
+        }
+
+        /* Output Section */
+        .output-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: var(--glass-border);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--glass-shadow);
+            margin-top: 2rem;
+            transition: var(--transition);
+        }
+
+        .output-section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .output-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--dark-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .output-title i {
+            color: var(--primary-color);
+        }
+
+        .output-box {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            font-family: monospace;
+            font-size: 0.9rem;
+            color: var(--dark-color);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            margin-bottom: 1rem;
+            word-break: break-all;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .output-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            background: var(--glass-bg);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border: var(--glass-border);
+            border-radius: 50px;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            color: var(--dark-color);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .action-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .action-btn i {
+            font-size: 0.9rem;
+        }
+
+        .action-btn.copy {
+            background: rgba(76, 201, 240, 0.1);
+            color: var(--success-color);
+        }
+
+        .action-btn.copy:hover {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .action-btn.download {
+            background: rgba(67, 97, 238, 0.1);
+            color: var(--primary-color);
+        }
+
+        .action-btn.download:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .action-btn.share {
+            background: rgba(247, 37, 133, 0.1);
+            color: var(--warning-color);
+        }
+
+        .action-btn.share:hover {
+            background: var(--warning-color);
+            color: white;
+        }
+
+        .action-btn.clear {
+            background: rgba(108, 117, 125, 0.1);
+            color: #6c757d;
+        }
+
+        .action-btn.clear:hover {
+            background: #6c757d;
+            color: white;
+        }
+
+        /* Options Section */
+        .options-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: var(--glass-border);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--glass-shadow);
+            margin-top: 2rem;
+            transition: var(--transition);
+        }
+
+        .options-section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .options-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--dark-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .options-title i {
+            color: var(--primary-color);
+        }
+
+        .option-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .option-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--dark-color);
+            opacity: 0.8;
+        }
+
+        .option-control {
+            width: 100%;
+            padding: 0.5rem;
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--dark-color);
+            font-family: inherit;
+        }
+
+        .option-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .radio-option input {
+            margin: 0;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 3rem;
+            color: var(--dark-color);
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .social-link {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--glass-bg);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border: var(--glass-border);
+            color: var(--dark-color);
+            transition: var(--transition);
+            text-decoration: none;
+        }
+
+        .social-link:hover {
+            transform: translateY(-3px) scale(1.1);
+            color: var(--primary-color);
+        }
+
+        .back-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--dark-color);
+            font-size: 1.2rem;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+            z-index: 100;
+            box-shadow: var(--glass-shadow);
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .back-to-top:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-5px);
+        }
+
+        /* Ripple Effect */
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.7);
+            transform: scale(0);
+            animation: ripple 0.6s linear;
+            pointer-events: none;
+        }
+
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        /* 3D Card Effect */
+        .card-3d {
+            transform-style: preserve-3d;
+            transition: transform 0.5s ease;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .main-title h1 {
+                font-size: 2rem;
+            }
+            
+            .tool-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .output-actions {
+                justify-content: center;
+            }
+            
+            .action-btn {
+                flex: 1 0 calc(50% - 0.5rem);
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .main-title h1 {
+                font-size: 1.8rem;
+            }
+            
+            .upload-section, .preview-section, .output-section, .options-section {
+                padding: 1.5rem;
+            }
+            
+            .action-btn {
+                flex: 1 0 100%;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: var(--glass-border);
+            border-radius: var(--border-radius);
+            padding: 1rem 1.5rem;
+            color: var(--dark-color);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: var(--glass-shadow);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+
+        .toast.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .toast.success {
+            background: rgba(76, 201, 240, 0.2);
+            border-color: var(--success-color);
+        }
+
+        .toast.error {
+            background: rgba(247, 37, 133, 0.2);
+            border-color: var(--warning-color);
+        }
+
+        .toast i {
+            font-size: 1.2rem;
+        }
+
+        /* Cursor Options Panel */
+        .cursor-options {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: var(--glass-border);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            box-shadow: var(--glass-shadow);
+            z-index: 100;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .cursor-options.visible {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .cursor-toggle {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--dark-color);
+            font-size: 1.2rem;
+            cursor: pointer;
+            z-index: 101;
+            box-shadow: var(--glass-shadow);
+            transition: var(--transition);
+        }
+
+        .cursor-toggle:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Custom Cursor -->
+    <div class="custom-cursor"></div>
+    <div class="cursor-follower"></div>
+
+    <!-- Preloader -->
+    <div class="preloader">
+        <div class="loader"></div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast">
+        <i class="fas fa-check-circle"></i>
+        <span class="toast-message">Copied to clipboard!</span>
+    </div>
+
+    <!-- Cursor Options -->
+    <div class="cursor-options">
+        <div class="option-group">
+            <label class="option-label">Cursor Size</label>
+            <input type="range" class="option-control" id="cursor-size" min="10" max="40" value="20">
+        </div>
+        <div class="option-group">
+            <label class="option-label">Cursor Color</label>
+            <input type="color" class="option-control" id="cursor-color" value="#4361ee">
+        </div>
+        <div class="option-group">
+            <label class="option-label">Cursor Style</label>
+            <div class="radio-group">
+                <label class="radio-option">
+                    <input type="radio" name="cursor-style" value="default" checked> Default
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="cursor-style" value="pointer"> Pointer
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="cursor-toggle">
+        <i class="fas fa-mouse-pointer"></i>
+    </div>
+
+    <!-- Back to Top Button -->
+    <div class="back-to-top">
+        <i class="fas fa-arrow-up"></i>
+    </div>
+
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <a href="#" class="logo">
+                <i class="fas fa-image"></i>
+                <span>Image2Link</span>
+            </a>
+            <div class="header-actions">
+                <button class="theme-toggle" aria-label="Toggle theme">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button class="share-btn" aria-label="Share tool">
+                    <i class="fas fa-share-alt"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main>
+            <div class="main-title" data-aos="fade-up">
+                <h1>Image to Link Converter</h1>
+                <p>Upload any image and instantly get a shareable link. Supports PNG, JPG, GIF, SVG, and WebP formats.</p>
+            </div>
+
+            <!-- Tool Container -->
+            <div class="tool-container">
+                <!-- Upload Section -->
+                <div class="upload-section card-3d" data-aos="fade-right">
+                    <div class="dropzone" id="dropzone">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Drag & Drop your image here</p>
+                        <span>or click to browse files</span>
+                    </div>
+                    <input type="file" id="file-input" class="file-input" accept="image/*">
+                    <button class="upload-btn" id="upload-btn">
+                        <i class="fas fa-folder-open"></i>
+                        Browse Files
+                    </button>
+                </div>
+
+                <!-- Preview Section -->
+                <div class="preview-section card-3d" data-aos="fade-left">
+                    <h3 class="preview-title">
+                        <i class="fas fa-eye"></i>
+                        Image Preview
+                    </h3>
+                    <div class="image-preview">
+                        <div class="placeholder">
+                            <i class="fas fa-image"></i>
+                            <span>No image selected</span>
+                        </div>
+                        <img id="preview-image" alt="Preview">
+                    </div>
+                    <div class="image-info">
+                        <span id="file-name">File: None</span>
+                        <span id="file-size">Size: 0 KB</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Output Section -->
+            <div class="output-section card-3d" data-aos="fade-up">
+                <h3 class="output-title">
+                    <i class="fas fa-link"></i>
+                    Image Link
+                </h3>
+                <div class="output-box" id="output-box">
+                    No image uploaded yet. Upload an image to generate a link.
+                </div>
+                <div class="output-actions">
+                    <button class="action-btn copy" id="copy-btn">
+                        <i class="fas fa-copy"></i>
+                        Copy Link
+                    </button>
+                    <button class="action-btn download" id="download-btn">
+                        <i class="fas fa-download"></i>
+                        Download
+                    </button>
+                    <button class="action-btn share" id="share-btn">
+                        <i class="fas fa-share"></i>
+                        Share
+                    </button>
+                    <button class="action-btn clear" id="clear-btn">
+                        <i class="fas fa-trash"></i>
+                        Clear
+                    </button>
+                </div>
+            </div>
+
+            <!-- Options Section -->
+            <div class="options-section card-3d" data-aos="fade-up">
+                <h3 class="options-title">
+                    <i class="fas fa-cog"></i>
+                    Options
+                </h3>
+                <div class="option-group">
+                    <label class="option-label">Link Type</label>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="link-type" value="base64" checked> Base64
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="link-type" value="blob"> Blob URL
+                        </label>
+                    </div>
+                </div>
+                <div class="option-group">
+                    <label class="option-label">Theme</label>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="theme-pref" value="light"> Light
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="theme-pref" value="dark"> Dark
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="theme-pref" value="system"> System
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer data-aos="fade-up">
+            <div class="social-links">
+                <a href="https://github.com/Gurwindersgwd" class="social-link" aria-label="GitHub">
+                    <i class="fab fa-github"></i>
+                </a>
+                <a href="https://www.youtube.com/@Gurwindersgwd" class="social-link" aria-label="YouTube">
+                    <i class="fab fa-youtube"></i>
+                </a>
+                <a href="https://www.instagram.com/gur_web.creator/" class="social-link" aria-label="Instagram">
+                    <i class="fab fa-instagram"></i>
+                </a>
+                <a href="https://www.linkedin.com/in/gurwinder-singh-gangad-8ba93a359/" class="social-link" aria-label="LinkedIn">
+                    <i class="fab fa-linkedin"></i>
+                </a>
+                <a href="https://gurwindersgwd.netlify.app/" class="social-link" aria-label="Website">
+                    <i class="fas fa-globe"></i>
+                </a>
+                <a href="mailto:gsgangad.webdesigner@gmail.com" class="social-link" aria-label="Email">
+                    <i class="fas fa-envelope"></i>
+                </a>
+            </div>
+            <p>© 2023 Image to Link Converter. All rights reserved.</p>
+            <p>Made with <i class="fas fa-heart" style="color: var(--warning-color);"></i> for the web</p>
+        </footer>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+    <script>
+        // Initialize AOS (Animate On Scroll)
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true
+        });
+
+        // DOM Elements
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('file-input');
+        const uploadBtn = document.getElementById('upload-btn');
+        const previewImage = document.getElementById('preview-image');
+        const fileName = document.getElementById('file-name');
+        const fileSize = document.getElementById('file-size');
+        const outputBox = document.getElementById('output-box');
+        const copyBtn = document.getElementById('copy-btn');
+        const downloadBtn = document.getElementById('download-btn');
+        const shareBtn = document.getElementById('share-btn');
+        const clearBtn = document.getElementById('clear-btn');
+        const themeToggle = document.querySelector('.theme-toggle');
+        const shareToolBtn = document.querySelector('.share-btn');
+        const linkTypeRadios = document.querySelectorAll('input[name="link-type"]');
+        const themePrefRadios = document.querySelectorAll('input[name="theme-pref"]');
+        const toast = document.querySelector('.toast');
+        const backToTop = document.querySelector('.back-to-top');
+        const preloader = document.querySelector('.preloader');
+        const cursor = document.querySelector('.custom-cursor');
+        const cursorFollower = document.querySelector('.cursor-follower');
+        const cursorToggle = document.querySelector('.cursor-toggle');
+        const cursorOptions = document.querySelector('.cursor-options');
+        const cursorSizeInput = document.getElementById('cursor-size');
+        const cursorColorInput = document.getElementById('cursor-color');
+        const cursorStyleRadios = document.querySelectorAll('input[name="cursor-style"]');
+
+        // Global Variables
+        let currentImage = null;
+        let currentImageUrl = '';
+        let currentImageType = 'base64';
+        let currentTheme = 'light';
+
+        // Check for prefers-color-scheme
+        const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+
+        // Preloader
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                preloader.classList.add('fade-out');
+                setTimeout(() => {
+                    preloader.style.display = 'none';
+                }, 500);
+            }, 1000);
+        });
+
+        // Theme Management
+        function setTheme(theme) {
+            currentTheme = theme;
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            
+            // Update theme toggle icon
+            const themeIcon = themeToggle.querySelector('i');
+            themeIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            
+            // Update radio buttons
+            themePrefRadios.forEach(radio => {
+                if (radio.value === theme) {
+                    radio.checked = true;
+                }
+            });
+        }
+
+        function toggleTheme() {
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            setTheme(newTheme);
+        }
+
+        // Initialize theme from localStorage or system preference
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            setTheme(savedTheme);
+        } else if (prefersDarkScheme.matches) {
+            setTheme('dark');
+        }
+
+        // Theme toggle button
+        themeToggle.addEventListener('click', toggleTheme);
+
+        // Theme preference radios
+        themePrefRadios.forEach(radio => {
+            radio.addEventListener('change', () => {
+                if (radio.value === 'system') {
+                    setTheme(prefersDarkScheme.matches ? 'dark' : 'light');
+                } else {
+                    setTheme(radio.value);
+                }
+            });
+        });
+
+        // System theme change listener
+        prefersDarkScheme.addEventListener('change', e => {
+            const systemTheme = e.matches ? 'dark' : 'light';
+            const themePref = document.querySelector('input[name="theme-pref"]:checked').value;
+            
+            if (themePref === 'system') {
+                setTheme(systemTheme);
+            }
+        });
+
+        // File Handling
+        function handleFile(file) {
+            if (!file.type.match('image.*')) {
+                showToast('Please select an image file', 'error');
+                return;
+            }
+
+            currentImage = file;
+            fileName.textContent = `File: ${file.name}`;
+            fileSize.textContent = `Size: ${formatFileSize(file.size)}`;
+
+            // Preview image
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImage.src = e.target.result;
+                previewImage.style.display = 'block';
+                document.querySelector('.image-preview .placeholder').style.display = 'none';
+                generateImageLink();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function generateImageLink() {
+            if (!currentImage) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                if (currentImageType === 'base64') {
+                    currentImageUrl = e.target.result;
+                    outputBox.textContent = currentImageUrl.length > 500 
+                        ? currentImageUrl.substring(0, 500) + '...' 
+                        : currentImageUrl;
+                } else {
+                    // Blob URL
+                    const blob = new Blob([currentImage], { type: currentImage.type });
+                    currentImageUrl = URL.createObjectURL(blob);
+                    outputBox.textContent = currentImageUrl;
+                }
+            };
+
+            if (currentImageType === 'base64') {
+                reader.readAsDataURL(currentImage);
+            } else {
+                // For blob URLs, we already have the file
+                const blob = new Blob([currentImage], { type: currentImage.type });
+                currentImageUrl = URL.createObjectURL(blob);
+                outputBox.textContent = currentImageUrl;
+            }
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function clearAll() {
+            currentImage = null;
+            currentImageUrl = '';
+            previewImage.src = '';
+            previewImage.style.display = 'none';
+            document.querySelector('.image-preview .placeholder').style.display = 'flex';
+            fileName.textContent = 'File: None';
+            fileSize.textContent = 'Size: 0 KB';
+            outputBox.textContent = 'No image uploaded yet. Upload an image to generate a link.';
+        }
+
+        // Event Listeners
+        dropzone.addEventListener('click', () => fileInput.click());
+        uploadBtn.addEventListener('click', () => fileInput.click());
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        // Drag and Drop
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropzone.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight() {
+            dropzone.classList.add('active');
+        }
+
+        function unhighlight() {
+            dropzone.classList.remove('active');
+        }
+
+        dropzone.addEventListener('drop', (e) => {
+            const dt = e.dataTransfer;
+            const file = dt.files[0];
+            if (file) {
+                handleFile(file);
+            }
+        });
+
+        // Link Type Selection
+        linkTypeRadios.forEach(radio => {
+            radio.addEventListener('change', () => {
+                currentImageType = radio.value;
+                if (currentImage) {
+                    generateImageLink();
+                }
+            });
+        });
+
+        // Copy Button
+        copyBtn.addEventListener('click', () => {
+            if (!currentImageUrl) {
+                showToast('No image link to copy', 'error');
+                return;
+            }
+
+            navigator.clipboard.writeText(currentImageUrl).then(() => {
+                showToast('Copied to clipboard!', 'success');
+            }).catch(err => {
+                showToast('Failed to copy: ' + err, 'error');
+            });
+        });
+
+        // Download Button
+        downloadBtn.addEventListener('click', () => {
+            if (!currentImage || !currentImageUrl) {
+                showToast('No image to download', 'error');
+                return;
+            }
+
+            const a = document.createElement('a');
+            if (currentImageType === 'base64') {
+                a.href = currentImageUrl;
+                a.download = currentImage.name || 'image';
+            } else {
+                // For blob URLs, we need to create a new blob
+                const blob = new Blob([currentImage], { type: currentImage.type });
+                a.href = URL.createObjectURL(blob);
+                a.download = currentImage.name || 'image';
+            }
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            
+            showToast('Download started', 'success');
+        });
+
+        // Share Button
+        shareBtn.addEventListener('click', () => {
+            if (!currentImageUrl) {
+                showToast('No image to share', 'error');
+                return;
+            }
+
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Image Link',
+                    text: 'Check out this image link I created',
+                    url: currentImageUrl
+                }).catch(err => {
+                    showToast('Share cancelled: ' + err, 'error');
+                });
+            } else {
+                // Fallback for browsers that don't support Web Share API
+                navigator.clipboard.writeText(currentImageUrl).then(() => {
+                    showToast('Link copied to clipboard. Paste it anywhere to share!', 'success');
+                }).catch(err => {
+                    showToast('Failed to share: ' + err, 'error');
+                });
+            }
+        });
+
+        // Share Tool Button
+        shareToolBtn.addEventListener('click', () => {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Image to Link Converter',
+                    text: 'Convert images to shareable links instantly with this free tool',
+                    url: window.location.href
+                }).catch(err => {
+                    showToast('Share cancelled: ' + err, 'error');
+                });
+            } else {
+                // Fallback for browsers that don't support Web Share API
+                navigator.clipboard.writeText(window.location.href).then(() => {
+                    showToast('Tool link copied to clipboard. Paste it anywhere to share!', 'success');
+                }).catch(err => {
+                    showToast('Failed to share: ' + err, 'error');
+                });
+            }
+        });
+
+        // Clear Button
+        clearBtn.addEventListener('click', clearAll);
+
+        // Toast Notification
+        function showToast(message, type = 'success') {
+            const toastIcon = toast.querySelector('i');
+            const toastMessage = toast.querySelector('.toast-message');
+            
+            toast.className = `toast ${type}`;
+            toastMessage.textContent = message;
+            
+            if (type === 'success') {
+                toastIcon.className = 'fas fa-check-circle';
+            } else {
+                toastIcon.className = 'fas fa-exclamation-circle';
+            }
+            
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Back to Top Button
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                backToTop.classList.add('visible');
+            } else {
+                backToTop.classList.remove('visible');
+            }
+        });
+
+        backToTop.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+
+        // Ripple Effect for Buttons
+        document.querySelectorAll('.upload-btn, .action-btn, .social-link').forEach(button => {
+            button.addEventListener('click', function(e) {
+                const rect = this.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const ripple = document.createElement('span');
+                ripple.className = 'ripple';
+                ripple.style.left = `${x}px`;
+                ripple.style.top = `${y}px`;
+                
+                this.appendChild(ripple);
+                
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            });
+        });
+
+        // Custom Cursor
+        let cursorVisible = true;
+
+        function updateCursorSize() {
+            const size = cursorSizeInput.value;
+            document.documentElement.style.setProperty('--cursor-size', `${size}px`);
+        }
+
+        function updateCursorColor() {
+            const color = cursorColorInput.value;
+            document.documentElement.style.setProperty('--cursor-color', color);
+        }
+
+        function updateCursorStyle(style) {
+            if (style === 'pointer') {
+                cursor.style.borderRadius = '0';
+                cursor.style.width = '10px';
+                cursor.style.height = '16px';
+                cursor.style.backgroundColor = 'transparent';
+                cursor.style.borderLeft = `2px solid ${cursorColorInput.value}`;
+                cursor.style.borderBottom = `2px solid ${cursorColorInput.value}`;
+            } else {
+                cursor.style.borderRadius = '50%';
+                cursor.style.width = `${cursorSizeInput.value}px`;
+                cursor.style.height = `${cursorSizeInput.value}px`;
+                cursor.style.backgroundColor = cursorColorInput.value;
+                cursor.style.borderLeft = 'none';
+                cursor.style.borderBottom = 'none';
+            }
+        }
+
+        // Initialize cursor
+        updateCursorSize();
+        updateCursorColor();
+
+        // Cursor movement
+        document.addEventListener('mousemove', (e) => {
+            if (!cursorVisible) return;
+            
+            cursor.style.left = `${e.clientX}px`;
+            cursor.style.top = `${e.clientY}px`;
+            
+            // Follower with delay
+            setTimeout(() => {
+                cursorFollower.style.left = `${e.clientX}px`;
+                cursorFollower.style.top = `${e.clientY}px`;
+            }, 100);
+        });
+
+        // Cursor interaction effects
+        document.querySelectorAll('button, a, input, .dropzone').forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                cursor.classList.add('active');
+            });
+            
+            el.addEventListener('mouseleave', () => {
+                cursor.classList.remove('active');
+            });
+        });
+
+        // Cursor options panel
+        cursorToggle.addEventListener('click', () => {
+            cursorOptions.classList.toggle('visible');
+        });
+
+        // Cursor size control
+        cursorSizeInput.addEventListener('input', updateCursorSize);
+
+        // Cursor color control
+        cursorColorInput.addEventListener('input', updateCursorColor);
+
+        // Cursor style radios
+        cursorStyleRadios.forEach(radio => {
+            radio.addEventListener('change', () => {
+                updateCursorStyle(radio.value);
+            });
+        });
+
+        // 3D Card Effect
+        document.querySelectorAll('.card-3d').forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                
+                const angleX = (y - centerY) / 20;
+                const angleY = (centerX - x) / 20;
+                
+                card.style.transform = `perspective(1000px) rotateX(${angleX}deg) rotateY(${angleY}deg)`;
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)';
+            });
+        }); 
+
+        // Text-to-Speech on Scroll
+        if ('speechSynthesis' in window) {
+            const speechSynthesis = window.speechSynthesis;
+            const mainTitle = document.querySelector('.main-title h1');
+            const mainDescription = document.querySelector('.main-title p');
+            
+            function speakOnScroll() {
+                const scrollPosition = window.scrollY;
+                const titlePosition = mainTitle.getBoundingClientRect().top + scrollPosition;
+                
+                if (scrollPosition > titlePosition - window.innerHeight / 2 && !speechSynthesis.speaking) {
+                    const utterance1 = new SpeechSynthesisUtterance(mainTitle.textContent);
+                    const utterance2 = new SpeechSynthesisUtterance(mainDescription.textContent);
+                    
+                    // Set voice properties
+                    utterance1.rate = 0.9;
+                    utterance1.pitch = 1;
+                    utterance2.rate = 0.9;
+                    utterance2.pitch = 1;
+                    
+                    // Speak sequentially
+                    speechSynthesis.speak(utterance1);
+                    utterance1.onend = () => {
+                        speechSynthesis.speak(utterance2);
+                    };
+                    
+                    // Remove event listener after speaking once
+                    window.removeEventListener('scroll', speakOnScroll);
+                }
+            }
+            
+            window.addEventListener('scroll', speakOnScroll);
+        }
+    </script>
+</body>
+</html>
